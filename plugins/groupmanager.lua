@@ -30,8 +30,13 @@ end
           lock_webpage = 'no',
           lock_markdown = 'no',
           flood = 'yes',
-          lock_bots = 'yes'
-          },
+          lock_bots = 'yes',
+	  lock_contacts = 'yes',
+          lock_fwd = 'yes',
+	  lock_cmd = 'yes',
+	  lock_tgservice = 'yes',
+	  lock_edit = 'yes'
+	},
    mutes = {
                   mute_fwd = 'no',
                   mute_audio = 'no',
@@ -56,7 +61,7 @@ end
       data[tostring(groups)][tostring(msg.chat_id_)] = msg.chat_id_
       save_data(_config.moderation.data, data)
     if not lang then
-  return '*Group has been added*'
+  return '*⚜Group has been added⚜*'
 else
   return 'گروه با موفقیت به لیست گروه های مدیریتی ربات افزوده شد'
 end
@@ -511,7 +516,6 @@ end
   end
 end
 
-
 ---------------Lock Link-------------------
 local function lock_link(msg, data, target)
 local hash = "gp_lang:"..msg.chat_id_
@@ -802,6 +806,57 @@ end
 end
 end
 
+---------------Lock contacts-------------------
+local function lock_group_contacts(msg, data, target)
+  if not is_momod(msg) then
+    return
+  end
+  local group_contacts_lock = data[tostring(target)]['settings']['lock_contacts']
+  if group_contacts_lock == 'yes' then
+  local hash = 'group:'..msg.to.id
+  local group_lang = redis:hget(hash,'lang')
+  if group_lang then
+    return 'قفل ارسال کانتکت از قبل فعال بوده است'
+  else
+  return '*Contact*_posting is already locked'
+  end
+  end
+    data[tostring(target)]['settings']['lock_contacts'] = 'yes'
+    save_data(_config.moderation.data, data)
+    local hash = 'group:'..msg.to.id
+  local group_lang = redis:hget(hash,'lang')
+  if group_lang then
+    return 'قفل ارسال کانتکت فعال شد'
+    else
+    return '*Contact*_posting HasBeen locked'
+  end
+end
+
+local function unlock_group_contacts(msg, data, target)
+  if not is_momod(msg) then
+    return
+  end
+  local group_contacts_lock = data[tostring(target)]['settings']['lock_contacts']
+  if group_contacts_lock == 'no' then
+  local hash = 'group:'..msg.to.id
+  local group_lang = redis:hget(hash,'lang')
+  if group_lang then
+    return 'قفل ارسال کانتکت از قبل غیرفعال بوده است'
+  else
+  return '*contact*_posting is already Unlocked'
+  end
+  end
+    data[tostring(target)]['settings']['lock_contacts'] = 'no'
+    save_data(_config.moderation.data, data)
+    local hash = 'group:'..msg.to.id
+  local group_lang = redis:hget(hash,'lang')
+  if group_lang then
+    return 'قفل ارسال کانکت غیرفعال شد'
+    else
+    return '*contact*_posting HasBeen Unlocked'
+  end
+end
+
 ---------------Lock Flood-------------------
 local function lock_flood(msg, data, target) 
 local hash = "gp_lang:"..msg.chat_id_
@@ -969,13 +1024,158 @@ end
 else 
 data[tostring(target)]["settings"]["lock_markdown"] = "no" save_data(_config.moderation.data, data) 
 if not lang then
-return "*Markdown* _Posting Has Been Unlocked_"
+return "*Markdown*_Posting Has Been Unlocked_"
 else
 return "ارسال پیام های دارای فونت در گروه آزاد شد"
 end
 end
 end
+---------------Lock fwd-----------------------
+local group_fwd_lock = data[tostring(target)]['settings']['lock_fwd']
+  if group_fosh_lock == 'yes' then
+  local hash = 'group:'..msg.to.id
+  local group_lang = redis:hget(hash,'lang')
+  if group_lang then
+  return 'قفل فورواردازقبل فعال بود'
+  else
+    return '*fwd*_posting is already locked'
+  end
+  end
+    data[tostring(target)]['settings']['lock_fwd'] = 'yes'
+    save_data(_config.moderation.data, data)
+    local hash = 'group:'..msg.to.id
+  local group_lang = redis:hget(hash,'lang')
+  if group_lang then
+    return 'قفل فوروارد فعال شد'
+    else
+    return '*Fwd*_has been locked'
+  end
+end
 
+local function unlock_group_fwd(msg, data, target)
+  if not is_momod(msg) then
+    return
+  end
+  local group_fwd_lock = data[tostring(target)]['settings']['lock_fwd']
+  if group_fwd_lock == 'no' then
+  local hash = 'group:'..msg.to.id
+  local group_lang = redis:hget(hash,'lang')
+  if group_lang then
+    return 'قفل فوروارد از قبل غیرفعال بوده است'
+  else
+  return '*Fwd*_is not locked🔓'
+  end
+  end
+    data[tostring(target)]['settings']['lock_fwd'] = 'no'
+    save_data(_config.moderation.data, data)
+    local hash = 'group:'..msg.to.id
+  local group_lang = redis:hget(hash,'lang')
+  if group_lang then
+    return 'قفل فوروارد درگروه غیرفعال شد'
+    else
+    return '*Fwd*_has been unlocked'
+  end
+end
+---------------Lock tgservice-----------------
+local function lock_group_tgservice(msg, data, target)
+  if not is_momod(msg) then
+    return
+  end
+  local group_tgservice_lock = data[tostring(target)]['settings']['lock_tgservice']
+  if group_tgservice_lock == 'yes' then
+  local hash = 'group:'..msg.to.id
+  local group_lang = redis:hget(hash,'lang')
+  if group_lang then
+  return 'قفل اعلان ورود فعال بود'
+  else
+    return '*TGservice*_is already locked'
+  end
+  end
+    data[tostring(target)]['settings']['lock_tgservice'] = 'yes'
+    save_data(_config.moderation.data, data)
+    local hash = 'group:'..msg.to.id
+  local group_lang = redis:hget(hash,'lang')
+  if group_lang then
+  return 'قفل اعلان ورود فعال شد'
+  else
+    return '*TGservice*_has been locked'
+  end
+end
+
+local function unlock_group_tgservice(msg, data, target)
+  if not is_momod(msg) then
+    return
+  end
+  local group_tgservice_lock = data[tostring(target)]['settings']['lock_tgservice']
+  if group_tgservice_lock == 'no' then
+  local hash = 'group:'..msg.to.id
+  local group_lang = redis:hget(hash,'lang')
+  if group_lang then
+  return 'قفل اعلان ورود از قبل باز بوده است'
+  else
+    return '*TGService*_Is Not Locked!'
+  end
+  end 
+data[tostring(target)]['settings']['lock_tgservice'] = 'no'
+    save_data(_config.moderation.data, data)
+    local hash = 'group:'..msg.to.id
+  local group_lang = redis:hget(hash,'lang')
+  if group_lang then
+  return 'قفل اعلان ورود قفل شد'
+  else
+    return '*TGservice*_has been unlocked'
+  end
+end
+---------------Lock cmd-----------------------
+local function lock_group_cmds(msg, data, target)
+  if not is_momod(msg) then
+    return
+  end
+  local group_cmds_lock = data[tostring(target)]['settings']['cmds']
+  if group_cmds_lock == 'yes' then
+   local hash = 'group:'..msg.to.id
+  local group_lang = redis:hget(hash,'lang')
+  if group_lang then
+   return '*قفل دستورات بسته بود*'
+   else
+    return '*cmds* Posting is already locked'
+    end
+    end
+    data[tostring(target)]['settings']['cmds'] = 'yes'
+    save_data(_config.moderation.data, data)
+    local hash = 'group:'..msg.to.id
+  local group_lang = redis:hget(hash,'lang')
+  if group_lang then
+    return '*قفل دستورات بسته شد*'
+     else
+    return '*cmds* Posting Has Been Locked🔒'
+  end
+end
+
+local function unlock_group_cmds(msg, data, target)
+  if not is_momod(msg) then
+    return
+  end
+  local group_cmds_lock = data[tostring(target)]['settings']['cmds']
+  if group_cmds_lock == 'no' then
+  local hash = 'group:'..msg.to.id
+  local group_lang = redis:hget(hash,'lang')
+  if group_lang then
+    return '🔒قفل دستورات غیرفعال بود🔓'
+    else 
+    return '*cmds* Posting is already Unlocked🔓'
+    end
+    end
+    data[tostring(target)]['settings']['cmds'] = 'no'
+    save_data(_config.moderation.data, data)
+    local hash = 'group:'..msg.to.id
+  local group_lang = redis:hget(hash,'lang')
+  if group_lang then
+    return '*قفل دستورات فعال شد*🔓'
+     else 
+     return '*cmds* Posting Hasbeen unLocked🔓'
+  end
+end
 ---------------Lock Webpage-------------------
 local function lock_webpage(msg, data, target) 
 local hash = "gp_lang:"..msg.chat_id_
